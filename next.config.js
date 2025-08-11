@@ -8,8 +8,6 @@ const nextConfig = {
 
   // Experimental features
   experimental: {
-    // Enable app directory (Next.js 13+)
-    appDir: true,
     // Enable server components logging
     serverComponentsExternalPackages: ['@prisma/client'],
     // Enable optimized package imports
@@ -34,7 +32,7 @@ const nextConfig = {
 
   // Environment variables that should be available on the client side
   env: {
-    CUSTOM_KEY: process.env.CUSTOM_KEY,
+    CUSTOM_KEY: process.env.NEXTAUTH_SECRET,
     APP_VERSION: process.env.npm_package_version,
   },
 
