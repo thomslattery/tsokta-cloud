@@ -1,160 +1,245 @@
+import React from 'react'
 import Link from 'next/link'
+import { Mail, Phone, MapPin, Twitter, Linkedin, Github, Facebook } from 'lucide-react'
 
-const footerLinks = {
-  products: [
-    { name: 'TS-Pro 3000', href: '/products#ts-pro-3000' },
-    { name: 'TS-Compact 1500', href: '/products#ts-compact-1500' },
-    { name: 'TS-Enterprise X', href: '/products#ts-enterprise-x' },
-    { name: 'Accessories', href: '/products#accessories' },
-  ],
-  support: [
-    { name: 'Documentation', href: '/docs' },
-    { name: 'Installation Guide', href: '/docs/installation' },
-    { name: 'Technical Support', href: '/support' },
-    { name: 'Warranty', href: '/warranty' },
-  ],
-  company: [
-    { name: 'About Us', href: '/about' },
-    { name: 'Careers', href: '/careers' },
-    { name: 'Press', href: '/press' },
-    { name: 'Contact', href: '/contact' },
-  ]
-}
-
-const socialLinks = [
-  {
-    name: 'Twitter',
-    href: '#',
-    icon: (
-      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-      </svg>
-    ),
-  },
-  {
-    name: 'LinkedIn',
-    href: '#',
-    icon: (
-      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'GitHub',
-    href: '#',
-    icon: (
-      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-      </svg>
-    ),
-  },
-]
-
-export default function Footer() {
+const Footer: React.FC = () => {
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid md:grid-cols-4 gap-8">
-          {/* Company */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Company</h4>
-            <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Company Info */}
+          <div className="col-span-1">
+            <div className="mb-4">
+              <h3 className="text-xl font-bold text-blue-400 mb-2">Tsokta Sprockets</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                Revolutionary electronic interface solutions for seamless widget integration. 
+                Leading the industry in sprocket technology and thingamajig innovation.
+              </p>
+            </div>
             
-            <div className="mt-6">
-              <h5 className="font-semibold mb-2">Contact Info</h5>
-              <ul className="space-y-1 text-gray-400 text-sm">
-                <li>
-                  <a href="tel:1-800-TSOKTA-1" className="hover:text-white transition-colors">
-                    1-800-TSOKTA-1
-                  </a>
-                </li>
-                <li>
-                  <a href="mailto:support@tsoktasprockets.com" className="hover:text-white transition-colors">
-                    support@tsoktasprockets.com
-                  </a>
-                </li>
-                <li>123 Widget Way</li>
-                <li>Sprocket City, SC 12345</li>
-              </ul>
+            <div className="space-y-2">
+              <div className="flex items-center text-sm text-gray-300">
+                <MapPin className="w-4 h-4 mr-2 text-blue-400" />
+                123 Innovation Drive, Tech Valley, CA 94043
+              </div>
+              <div className="flex items-center text-sm text-gray-300">
+                <Phone className="w-4 h-4 mr-2 text-blue-400" />
+                (555) 123-SPROCKET
+              </div>
+              <div className="flex items-center text-sm text-gray-300">
+                <Mail className="w-4 h-4 mr-2 text-blue-400" />
+                info@tsokta-sprockets.com
+              </div>
+            </div>
+          </div>
+
+          {/* Products & Solutions */}
+          <div className="col-span-1">
+            <h4 className="text-lg font-semibold mb-4 text-white">Products</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/products/electronic-interfaces" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Electronic Interfaces
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/widget-integrators" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Widget Integrators
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/sprocket-systems" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Sprocket Systems
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/thingamajigs" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Advanced Thingamajigs
+                </Link>
+              </li>
+              <li>
+                <Link href="/products/custom-solutions" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Custom Solutions
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support & Resources */}
+          <div className="col-span-1">
+            <h4 className="text-lg font-semibold mb-4 text-white">Support</h4>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/support" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Support Center
+                </Link>
+              </li>
+              <li>
+                <Link href="/support/tickets" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Submit Ticket
+                </Link>
+              </li>
+              <li>
+                <Link href="/docs" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Documentation
+                </Link>
+              </li>
+              <li>
+                <Link href="/docs/api" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  API Reference
+                </Link>
+              </li>
+              <li>
+                <Link href="/training" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Training Resources
+                </Link>
+              </li>
+              <li>
+                <Link href="/community" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Community Forum
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company & Legal */}
+          <div className="col-span-1">
+            <h4 className="text-lg font-semibold mb-4 text-white">Company</h4>
+            <ul className="space-y-2 mb-6">
+              <li>
+                <Link href="/about" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/careers" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link href="/news" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  News & Press
+                </Link>
+              </li>
+              <li>
+                <Link href="/partners" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Partners
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-gray-300 hover:text-blue-400 transition-colors text-sm">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+
+            {/* Social Media Links */}
+            <div>
+              <h5 className="text-sm font-semibold mb-3 text-white">Follow Us</h5>
+              <div className="flex space-x-4">
+                <a
+                  href="https://twitter.com/tsokta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  aria-label="Follow us on Twitter"
+                >
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://linkedin.com/company/tsokta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  aria-label="Connect on LinkedIn"
+                >
+                  <Linkedin className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://github.com/tsokta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  aria-label="View our GitHub"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+                <a
+                  href="https://facebook.com/tsokta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-blue-400 transition-colors"
+                  aria-label="Like us on Facebook"
+                >
+                  <Facebook className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
         </div>
-        
+
+        {/* Newsletter Signup */}
+        <div className="border-t border-gray-800 mt-12 pt-8">
+          <div className="max-w-md mx-auto text-center lg:max-w-none lg:text-left lg:flex lg:items-center lg:justify-between">
+            <div className="lg:flex-1">
+              <h4 className="text-lg font-semibold text-white mb-2">Stay Updated</h4>
+              <p className="text-gray-300 text-sm">
+                Get the latest updates on new products and industry insights.
+              </p>
+            </div>
+            <div className="mt-4 lg:mt-0 lg:ml-8 lg:flex-shrink-0">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            &copy; 2025 Tsokta Sprockets. All rights reserved.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Privacy Policy
-            </Link>
-            <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Terms of Service
-            </Link>
-            <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Cookie Policy
-            </Link>
+        <div className="border-t border-gray-800 mt-8 pt-8">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+            <div className="text-center lg:text-left">
+              <p className="text-gray-400 text-sm">
+                © {new Date().getFullYear()} Tsokta Sprockets. All rights reserved.
+              </p>
+            </div>
+            
+            <div className="mt-4 lg:mt-0">
+              <ul className="flex flex-wrap justify-center lg:justify-end space-x-6 text-sm">
+                <li>
+                  <Link href="/legal/privacy" className="text-gray-400 hover:text-white transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/terms" className="text-gray-400 hover:text-white transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/legal/cookies" className="text-gray-400 hover:text-white transition-colors">
+                    Cookie Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/sitemap" className="text-gray-400 hover:text-white transition-colors">
+                    Sitemap
+                  </Link>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
     </footer>
   )
-} Company Info */}
-          <div>
-            <h3 className="text-2xl font-bold mb-4">Tsokta Sprockets</h3>
-            <p className="text-gray-400 mb-4">
-              Leading provider of electronic thingamajigs for widget and sprocket integration worldwide.
-            </p>
-            <div className="flex space-x-4">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="text-gray-400 hover:text-white transition-colors"
-                  aria-label={item.name}
-                >
-                  {item.icon}
-                </a>
-              ))}
-            </div>
-          </div>
-          
-          {/* Products */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Products</h4>
-            <ul className="space-y-2">
-              {footerLinks.products.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {/* Support */}
-          <div>
-            <h4 className="text-lg font-semibold mb-4">Support</h4>
-            <ul className="space-y-2">
-              {footerLinks.support.map((link) => (
-                <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          {/*
+}
+
+export default Footer
