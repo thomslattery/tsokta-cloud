@@ -1,10 +1,58 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
+import Link from 'next'
+
+import { authService, User } from '@/lib/auth'
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const isAuth = await authService.isAuthenticated()
+        if (!isAuth) {
+          window.location.href = '/login'
+          return
+        }
+
+        const currentUser = await authService.getUser()
+        setUser(currentUser)
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        window.location.href = '/login'
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await authService.signOut()
+      window.location.href = '/'
+    } catch (error) {
+      console.error('Sign out failed:', error)
+      // Force redirect even if signout fails
+      window.location.href = '/'
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Mock data for demonstration
   const systemStats = {
@@ -44,9 +92,17 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                Welcome back, <span className="font-medium">Demo User</span>
+                Welcome back, <span className="font-medium">{user?.name || user?.email || 'User'}</span>
+                {user?.groups && user.groups.length > 0 && (
+                  <span className="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                    {user.groups[0]}
+                  </span>
+                )}
               </div>
-              <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+              <button 
+                onClick={handleSignOut}
+                className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors"
+              >
                 Sign Out
               </button>
             </div>
