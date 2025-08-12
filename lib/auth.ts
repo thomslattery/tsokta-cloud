@@ -1,171 +1,332 @@
-// Simple authentication utility functions
-// In a real application, you would integrate with a proper auth service
+// OIDC Authentication with Okta Integration
+import { OktaAuth, TokenManager, UserClaims } from '@okta/okta-auth-js'
 
 export interface User {
   id: string
   email: string
   name: string
-  role: 'admin' | 'user'
-  company?: string
-}
-
-export interface LoginCredentials {
-  email: string
-  password: string
+  given_name?: string
+  family_name?: string
+  locale?: string
+  preferred_username?: string
+  groups?: string[]
+  custom_claims?: Record<string, any>
 }
 
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  accessToken?: string
+  idToken?: string
 }
 
-// Demo user for testing
-const DEMO_USER: User = {
-  id: '1',
-  email: 'demo@tsoktasprockets.com',
-  name: 'Demo User',
-  role: 'admin',
-  company: 'Tsokta Sprockets Demo'
+export interface OktaConfig {
+  issuer: string
+  clientId: string
+  redirectUri: string
+  scopes: string[]
+  pkce: boolean
+  responseType: string[]
+  responseMode: string
+  state: string
+  nonce: string
 }
 
-// Demo credentials
-const DEMO_CREDENTIALS = {
-  email: 'demo@tsoktasprockets.com',
-  password: 'demo123'
+// Default configuration - these should be set via environment variables
+const DEFAULT_CONFIG: Partial<OktaConfig> = {
+  scopes: ['openid', 'profile', 'email', 'groups'],
+  pkce: true,
+  responseType: ['code'],
+  responseMode: 'query',
+  state: true,
+  nonce: true,
 }
 
-export async function authenticateUser(credentials: LoginCredentials): Promise<User | null> {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  // Check demo credentials
-  if (
-    credentials.email === DEMO_CREDENTIALS.email &&
-    credentials.password === DEMO_CREDENTIALS.password
-  ) {
-    return DEMO_USER
+class AuthService {
+  private oktaAuth: OktaAuth | null = null
+  private config: OktaConfig | null = null
+
+  constructor() {
+    this.initializeConfig()
   }
-  
-  // In a real app, you would make an API call here
-  throw new Error('Invalid credentials')
+
+  private initializeConfig() {
+    // Configuration should come from environment variables
+    const issuer = process.env.NEXT_PUBLIC_OKTA_ISSUER
+    const clientId = process.env.NEXT_PUBLIC_OKTA_CLIENT_ID
+    const redirectUri = process.env.NEXT_PUBLIC_OKTA_REDIRECT_URI || `${window?.location?.origin}/login/callback`
+
+    if (!issuer || !clientId) {
+      console.warn('Okta configuration missing. Please set NEXT_PUBLIC_OKTA_ISSUER and NEXT_PUBLIC_OKTA_CLIENT_ID')
+      return
+    }
+
+    this.config = {
+      issuer,
+      clientId,
+      redirectUri,
+      ...DEFAULT_CONFIG,
+    } as OktaConfig
+
+    this.oktaAuth = new OktaAuth({
+      issuer: this.config.issuer,
+      clientId: this.config.clientId,
+      redirectUri: this.config.redirectUri,
+      scopes: this.config.scopes,
+      pkce: this.config.pkce,
+      responseType: this.config.responseType,
+      responseMode: this.config.responseMode,
+      state: this.config.state,
+      nonce: this.config.nonce,
+      // Additional Okta-specific options
+      transformErrorXHR: (xhr: any) => {
+        // Handle custom error transformations if needed
+        return xhr
+      },
+      devMode: process.env.NODE_ENV === 'development',
+    })
+  }
+
+  getOktaAuth(): OktaAuth | null {
+    return this.oktaAuth
+  }
+
+  getConfig(): OktaConfig | null {
+    return this.config
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    if (!this.oktaAuth) return false
+    
+    try {
+      return await this.oktaAuth.isAuthenticated()
+    } catch (error) {
+      console.error('Error checking authentication status:', error)
+      return false
+    }
+  }
+
+  async getUser(): Promise<User | null> {
+    if (!this.oktaAuth) return null
+
+    try {
+      const isAuth = await this.isAuthenticated()
+      if (!isAuth) return null
+
+      const userInfo = await this.oktaAuth.getUser() as UserClaims
+      const tokenManager = this.oktaAuth.tokenManager
+      const accessToken = await tokenManager.get('accessToken')
+      const idToken = await tokenManager.get('idToken')
+
+      // Extract custom claims from ID token if available
+      const customClaims: Record<string, any> = {}
+      if (idToken?.claims) {
+        Object.keys(idToken.claims).forEach(key => {
+          if (!['aud', 'exp', 'iat', 'iss', 'sub', 'nonce', 'auth_time'].includes(key)) {
+            customClaims[key] = idToken.claims[key]
+          }
+        })
+      }
+
+      return {
+        id: userInfo.sub || '',
+        email: userInfo.email || '',
+        name: userInfo.name || `${userInfo.given_name || ''} ${userInfo.family_name || ''}`.trim(),
+        given_name: userInfo.given_name,
+        family_name: userInfo.family_name,
+        locale: userInfo.locale,
+        preferred_username: userInfo.preferred_username,
+        groups: Array.isArray(userInfo.groups) ? userInfo.groups : [],
+        custom_claims: customClaims,
+      }
+    } catch (error) {
+      console.error('Error getting user info:', error)
+      return null
+    }
+  }
+
+  async getTokens(): Promise<{ accessToken?: string; idToken?: string }> {
+    if (!this.oktaAuth) return {}
+
+    try {
+      const tokenManager = this.oktaAuth.tokenManager
+      const accessToken = await tokenManager.get('accessToken')
+      const idToken = await tokenManager.get('idToken')
+
+      return {
+        accessToken: accessToken?.value,
+        idToken: idToken?.value,
+      }
+    } catch (error) {
+      console.error('Error getting tokens:', error)
+      return {}
+    }
+  }
+
+  async signOut(): Promise<void> {
+    if (!this.oktaAuth) return
+
+    try {
+      // Clear tokens from storage
+      await this.oktaAuth.signOut()
+      
+      // Optionally redirect to Okta for complete logout
+      // await this.oktaAuth.signOut({ postLogoutRedirectUri: window.location.origin })
+    } catch (error) {
+      console.error('Error during sign out:', error)
+      // Clear local tokens even if remote logout fails
+      this.oktaAuth.tokenManager.clear()
+    }
+  }
+
+  async refreshTokens(): Promise<boolean> {
+    if (!this.oktaAuth) return false
+
+    try {
+      const tokenManager = this.oktaAuth.tokenManager
+      await tokenManager.renew('accessToken')
+      await tokenManager.renew('idToken')
+      return true
+    } catch (error) {
+      console.error('Error refreshing tokens:', error)
+      return false
+    }
+  }
+
+  // Handle the callback after OIDC authentication
+  async handleAuthCallback(): Promise<User | null> {
+    if (!this.oktaAuth) return null
+
+    try {
+      // Parse tokens from URL
+      await this.oktaAuth.handleRedirect()
+      return await this.getUser()
+    } catch (error) {
+      console.error('Error handling auth callback:', error)
+      throw error
+    }
+  }
+
+  // Set up token auto-renewal
+  setupTokenRenewal(): void {
+    if (!this.oktaAuth) return
+
+    this.oktaAuth.tokenManager.on('renewed', (key: string, newToken: any, oldToken: any) => {
+      console.log(`Token ${key} renewed successfully`)
+    })
+
+    this.oktaAuth.tokenManager.on('error', (error: any) => {
+      console.error('Token manager error:', error)
+      // Optionally redirect to login
+    })
+
+    // Start the service to automatically renew tokens
+    this.oktaAuth.start()
+  }
+
+  // Check if user has specific groups/roles
+  hasGroup(user: User | null, groupName: string): boolean {
+    return user?.groups?.includes(groupName) || false
+  }
+
+  hasAnyGroup(user: User | null, groupNames: string[]): boolean {
+    return groupNames.some(group => this.hasGroup(user, group))
+  }
+
+  // Get custom claim value
+  getCustomClaim(user: User | null, claimName: string): any {
+    return user?.custom_claims?.[claimName]
+  }
 }
 
-export function validateCredentials(credentials: LoginCredentials): string | null {
-  if (!credentials.email) {
-    return 'Email is required'
-  }
-  
-  if (!credentials.password) {
-    return 'Password is required'
-  }
-  
-  if (!isValidEmail(credentials.email)) {
-    return 'Please enter a valid email address'
-  }
-  
-  if (credentials.password.length < 6) {
-    return 'Password must be at least 6 characters'
-  }
-  
-  return null
+// Create singleton instance
+export const authService = new AuthService()
+
+// Utility functions for backward compatibility
+export async function getCurrentUser(): Promise<User | null> {
+  return await authService.getUser()
 }
 
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-// Local storage helpers for demo purposes
-// In production, use secure session management
-export function storeAuthToken(token: string): void {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('auth_token', token)
-  }
-}
-
-export function getAuthToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token')
-  }
-  return null
-}
-
-export function removeAuthToken(): void {
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth_token')
-  }
-}
-
-export function getCurrentUser(): User | null {
-  // In a real app, you would decode the JWT token or make an API call
-  const token = getAuthToken()
-  if (token === 'demo_token') {
-    return DEMO_USER
-  }
-  return null
+export async function isAuthenticated(): Promise<boolean> {
+  return await authService.isAuthenticated()
 }
 
 export async function signOut(): Promise<void> {
-  removeAuthToken()
-  // In a real app, you might also invalidate the token on the server
+  return await authService.signOut()
 }
 
-// Password strength validation
-export function validatePasswordStrength(password: string): {
-  isValid: boolean
-  score: number
-  feedback: string[]
-} {
-  const feedback: string[] = []
-  let score = 0
+export async function getTokens(): Promise<{ accessToken?: string; idToken?: string }> {
+  return await authService.getTokens()
+}
+
+// React hook for authentication state
+export function useAuth() {
+  const [authState, setAuthState] = React.useState<AuthState>({
+    user: null,
+    isAuthenticated: false,
+    isLoading: true,
+  })
+
+  React.useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const isAuth = await authService.isAuthenticated()
+        if (isAuth) {
+          const user = await authService.getUser()
+          const tokens = await authService.getTokens()
+          setAuthState({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            ...tokens,
+          })
+        } else {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          })
+        }
+      } catch (error) {
+        console.error('Error checking auth state:', error)
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
+      }
+    }
+
+    checkAuth()
+
+    // Set up token renewal
+    authService.setupTokenRenewal()
+  }, [])
+
+  return authState
+}
+
+// Environment configuration validation
+export function validateOktaConfig(): { isValid: boolean; errors: string[] } {
+  const errors: string[] = []
   
-  if (password.length >= 8) {
-    score += 1
-  } else {
-    feedback.push('Use at least 8 characters')
+  if (!process.env.NEXT_PUBLIC_OKTA_ISSUER) {
+    errors.push('NEXT_PUBLIC_OKTA_ISSUER is required')
   }
   
-  if (/[a-z]/.test(password)) {
-    score += 1
-  } else {
-    feedback.push('Include lowercase letters')
+  if (!process.env.NEXT_PUBLIC_OKTA_CLIENT_ID) {
+    errors.push('NEXT_PUBLIC_OKTA_CLIENT_ID is required')
   }
-  
-  if (/[A-Z]/.test(password)) {
-    score += 1
-  } else {
-    feedback.push('Include uppercase letters')
+
+  // Validate issuer format
+  if (process.env.NEXT_PUBLIC_OKTA_ISSUER && 
+      !process.env.NEXT_PUBLIC_OKTA_ISSUER.includes('/oauth2/')) {
+    errors.push('NEXT_PUBLIC_OKTA_ISSUER should include the authorization server path (e.g., /oauth2/ausXXXXXX)')
   }
-  
-  if (/\d/.test(password)) {
-    score += 1
-  } else {
-    feedback.push('Include numbers')
-  }
-  
-  if (/[^a-zA-Z\d]/.test(password)) {
-    score += 1
-  } else {
-    feedback.push('Include special characters')
-  }
-  
+
   return {
-    isValid: score >= 3,
-    score,
-    feedback
+    isValid: errors.length === 0,
+    errors,
   }
-}
-
-// Session management
-export function createSession(user: User): string {
-  // In a real app, this would be handled by your auth service
-  const sessionToken = 'demo_token'
-  storeAuthToken(sessionToken)
-  return sessionToken
-}
-
-export function isSessionValid(): boolean {
-  const token = getAuthToken()
-  return token !== null
 }
