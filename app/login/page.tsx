@@ -39,8 +39,16 @@ export default function LoginPage() {
 
         // Load Okta Sign-In Widget script if not already loaded
         if (!window.OktaSignIn) {
-          await loadScript('https://global.oktacdn.com/okta-signin-widget/7.18.0/js/okta-sign-in.min.js')
           await loadStylesheet('https://global.oktacdn.com/okta-signin-widget/7.18.0/css/okta-sign-in.min.css')
+          await loadScript('https://global.oktacdn.com/okta-signin-widget/7.18.0/js/okta-sign-in.min.js')
+          
+          // Wait a bit for the script to initialize
+          await new Promise(resolve => setTimeout(resolve, 100))
+          
+          // Verify the constructor is available
+          if (!window.OktaSignIn) {
+            throw new Error('Okta Sign-In Widget failed to load')
+          }
         }
 
         const config = authService.getConfig()
@@ -51,6 +59,9 @@ export default function LoginPage() {
         }
 
         // Initialize the Sign-In Widget
+        console.log('Initializing Okta Sign-In Widget...')
+        console.log('OktaSignIn constructor available:', typeof window.OktaSignIn)
+        
         signInWidget.current = new window.OktaSignIn({
           baseUrl: config.issuer.split('/oauth2')[0], // Extract base URL from issuer
           clientId: config.clientId,
@@ -107,6 +118,8 @@ export default function LoginPage() {
           ],
         })
 
+        console.log('Okta Sign-In Widget initialized successfully')
+
         // Handle successful authentication
         signInWidget.current.authClient = oktaAuth
 
@@ -153,6 +166,7 @@ export default function LoginPage() {
   // Helper function to load external scripts
   const loadScript = (src: string): Promise<void> => {
     return new Promise((resolve, reject) => {
+      // Check if script is already loaded
       if (document.querySelector(`script[src="${src}"]`)) {
         resolve()
         return
@@ -160,8 +174,19 @@ export default function LoginPage() {
 
       const script = document.createElement('script')
       script.src = src
-      script.onload = () => resolve()
-      script.onerror = () => reject(new Error(`Failed to load script: ${src}`))
+      script.async = true
+      script.crossOrigin = 'anonymous'
+      
+      script.onload = () => {
+        console.log(`Successfully loaded: ${src}`)
+        resolve()
+      }
+      
+      script.onerror = (error) => {
+        console.error(`Failed to load script: ${src}`, error)
+        reject(new Error(`Failed to load script: ${src}`))
+      }
+      
       document.head.appendChild(script)
     })
   }
@@ -169,6 +194,7 @@ export default function LoginPage() {
   // Helper function to load external stylesheets
   const loadStylesheet = (href: string): Promise<void> => {
     return new Promise((resolve, reject) => {
+      // Check if stylesheet is already loaded
       if (document.querySelector(`link[href="${href}"]`)) {
         resolve()
         return
@@ -177,8 +203,18 @@ export default function LoginPage() {
       const link = document.createElement('link')
       link.rel = 'stylesheet'
       link.href = href
-      link.onload = () => resolve()
-      link.onerror = () => reject(new Error(`Failed to load stylesheet: ${href}`))
+      link.crossOrigin = 'anonymous'
+      
+      link.onload = () => {
+        console.log(`Successfully loaded stylesheet: ${href}`)
+        resolve()
+      }
+      
+      link.onerror = (error) => {
+        console.error(`Failed to load stylesheet: ${href}`, error)
+        reject(new Error(`Failed to load stylesheet: ${href}`))
+      }
+      
       document.head.appendChild(link)
     })
   }
