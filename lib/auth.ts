@@ -1,4 +1,5 @@
 // OIDC Authentication with Okta Integration
+import React from 'react'
 import { OktaAuth, TokenManager, UserClaims } from '@okta/okta-auth-js'
 
 export interface User {
@@ -52,10 +53,13 @@ class AuthService {
   }
 
   private initializeConfig() {
+    // Only initialize on client side
+    if (typeof window === 'undefined') return
+
     // Configuration should come from environment variables
     const issuer = process.env.NEXT_PUBLIC_OKTA_ISSUER
     const clientId = process.env.NEXT_PUBLIC_OKTA_CLIENT_ID
-    const redirectUri = process.env.NEXT_PUBLIC_OKTA_REDIRECT_URI || `${window?.location?.origin}/login/callback`
+    const redirectUri = process.env.NEXT_PUBLIC_OKTA_REDIRECT_URI || `${window.location.origin}/login/callback`
 
     if (!issuer || !clientId) {
       console.warn('Okta configuration missing. Please set NEXT_PUBLIC_OKTA_ISSUER and NEXT_PUBLIC_OKTA_CLIENT_ID')
@@ -269,6 +273,9 @@ export function useAuth() {
   })
 
   React.useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return
+
     const checkAuth = async () => {
       try {
         const isAuth = await authService.isAuthenticated()
