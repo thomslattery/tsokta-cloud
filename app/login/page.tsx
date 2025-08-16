@@ -323,7 +323,7 @@ export default function LoginPage() {
               Contact Support
             </Link>
             <span className="text-blue-300">•</span>
-            <a href="mailto:support@tsoktasprockets.com" className="text-white hover:text-blue-200 text-sm font-medium">
+            <a href="mailto:support@tsokta.cloud" className="text-white hover:text-blue-200 text-sm font-medium">
               Email Help
             </a>
           </div>
