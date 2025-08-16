@@ -70,7 +70,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@tsoktasprockets.com" className="text-gray-300 hover:text-white transition-colors">
+                <a href="mailto:support@tsokta.cloud" className="text-gray-300 hover:text-white transition-colors">
                   Technical Support
                 </a>
               </li>
