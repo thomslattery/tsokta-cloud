@@ -52,8 +52,8 @@ export default function Contact() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Email Us</h3>
-                  <p className="text-gray-600">sales@tsoktasprockets.com</p>
-                  <p className="text-gray-600">support@tsoktasprockets.com</p>
+                  <p className="text-gray-600">sales@tsokta.cloud</p>
+                  <p className="text-gray-600">support@tsokta.cloud</p>
                 </div>
               </div>
 
