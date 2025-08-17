@@ -58,7 +58,7 @@ export default function LoginPage() {
           throw new Error('Okta configuration not initialized')
         }
 
-        // Initialize the Sign-In Widget
+        // Initialize the Sign-In Widget using the npm package
         console.log('Initializing Okta Sign-In Widget...')
         console.log('OktaSignIn constructor available:', typeof window.OktaSignIn)
         
@@ -70,9 +70,6 @@ export default function LoginPage() {
             issuer: config.issuer,
             scopes: config.scopes,
             responseType: config.responseType,
-            responseMode: config.responseMode,
-            state: config.state,
-            nonce: config.nonce,
             pkce: config.pkce,
           },
           // Widget configuration
@@ -323,7 +320,7 @@ export default function LoginPage() {
               Contact Support
             </Link>
             <span className="text-blue-300">•</span>
-            <a href="mailto:support@tsokta.cloud" className="text-white hover:text-blue-200 text-sm font-medium">
+            <a href="mailto:support@tsoktasprockets.com" className="text-white hover:text-blue-200 text-sm font-medium">
               Email Help
             </a>
           </div>

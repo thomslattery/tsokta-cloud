@@ -28,20 +28,14 @@ export interface OktaConfig {
   redirectUri: string
   scopes: string[]
   pkce: boolean
-  responseType: string[]
-  responseMode: string
-  state: string
-  nonce: string
+  responseType: string
 }
 
 // Default configuration - these should be set via environment variables
-const DEFAULT_CONFIG: Partial<OktaConfig> = {
+const DEFAULT_CONFIG = {
   scopes: ['openid', 'profile', 'email', 'groups'],
   pkce: true,
-  responseType: ['code'],
-  responseMode: 'query',
-  state: true,
-  nonce: true,
+  responseType: 'code',
 }
 
 class AuthService {
@@ -71,7 +65,7 @@ class AuthService {
       clientId,
       redirectUri,
       ...DEFAULT_CONFIG,
-    } as OktaConfig
+    }
 
     this.oktaAuth = new OktaAuth({
       issuer: this.config.issuer,
@@ -79,17 +73,14 @@ class AuthService {
       redirectUri: this.config.redirectUri,
       scopes: this.config.scopes,
       pkce: this.config.pkce,
-      responseType: this.config.responseType,
-      responseMode: this.config.responseMode,
-      state: this.config.state,
-      nonce: this.config.nonce,
+      responseType: 'code',
       // Additional Okta-specific options
       transformErrorXHR: (xhr: any) => {
         // Handle custom error transformations if needed
         return xhr
       },
       devMode: process.env.NODE_ENV === 'development',
-    })
+    } as any)
   }
 
   getOktaAuth(): OktaAuth | null {
@@ -125,10 +116,11 @@ class AuthService {
 
       // Extract custom claims from ID token if available
       const customClaims: Record<string, any> = {}
-      if (idToken?.claims) {
-        Object.keys(idToken.claims).forEach(key => {
+      if (idToken && 'claims' in idToken) {
+        const claims = (idToken as any).claims
+        Object.keys(claims).forEach(key => {
           if (!['aud', 'exp', 'iat', 'iss', 'sub', 'nonce', 'auth_time'].includes(key)) {
-            customClaims[key] = idToken.claims[key]
+            customClaims[key] = claims[key]
           }
         })
       }
@@ -141,7 +133,7 @@ class AuthService {
         family_name: userInfo.family_name,
         locale: userInfo.locale,
         preferred_username: userInfo.preferred_username,
-        groups: Array.isArray(userInfo.groups) ? userInfo.groups : [],
+        groups: Array.isArray(userInfo.groups) ? userInfo.groups.map(group => String(group)) : [],
         custom_claims: customClaims,
       }
     } catch (error) {
@@ -159,8 +151,8 @@ class AuthService {
       const idToken = await tokenManager.get('idToken')
 
       return {
-        accessToken: accessToken?.value,
-        idToken: idToken?.value,
+        accessToken: accessToken ? (accessToken as any).accessToken || (accessToken as any).value : undefined,
+        idToken: idToken ? (idToken as any).idToken || (idToken as any).value : undefined,
       }
     } catch (error) {
       console.error('Error getting tokens:', error)
