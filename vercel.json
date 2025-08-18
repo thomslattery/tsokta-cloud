@@ -1,0 +1,37 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Authorization, Accept, Origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://global.oktacdn.com https://*.okta.com https://*.oktapreview.com https://*.tsokta.cloud; style-src 'self' 'unsafe-inline' https://global.oktacdn.com; connect-src 'self' https://*.okta.com https://*.oktacdn.com https://*.oktapreview.com https://*.tsokta.cloud; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com https://global.oktacdn.com; frame-ancestors 'none'; object-src 'none';"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
